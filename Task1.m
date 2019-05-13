@@ -43,8 +43,8 @@ end
 for n=5:50
     for k=5:50
         if(k<n)
-    roms(n-4,k-4)=RMS(-0.5,n,k);
-    mxe(n-4,k-4)=MxError(-0.5,n,k);
+    roms(n-4,k-4)=RMS(n,k);
+    mxe(n-4,k-4)=MxError(n,k);
         else
             roms(n-4,k-4)=NaN;
             mxe(n-4,k-4)=NaN;
@@ -54,19 +54,28 @@ end
 figure(10)
 surf(K,N,roms);
 figure(11)
-surf(K,N,mxe-roms);
+surf(K,N,mxe);
 
-function y=RMS(x,N,K)
-nominator=norm(Approximation(x,N,K)-FirstFunction(x),2);
-denominator=norm(FirstFunction(x),2);
-y=nominator/denominator;
+function y=RMS(N,K)
+nominator=zeros(1,N);
+denominator=zeros(1,N);
+x_n=GenerateXn(N);
+for i=1:N
+nominator(1,i)=Approximation(x_n(i),N,K)-FirstFunction(x_n(i));
+denominator(1,i)=FirstFunction(x_n(i));
+end
+y=norm(nominator,2)/norm(denominator,2);
 end
 
-function y=MxError(x,N,K)
-nominator=norm(Approximation(x,N,K)-FirstFunction(x),inf);
-denominator=norm(FirstFunction(x),inf);
-y=nominator/denominator;
+function y=MxError(N,K)
+nominator=zeros(1,N);
+denominator=zeros(1,N);
+x_n=GenerateXn(N);
+for i=1:N
+nominator(1,i)=Approximation(x_n(i),N,K)-FirstFunction(x_n(i));
+denominator(1,i)=FirstFunction(x_n(i));
 end
+y=norm(nominator,inf)/norm(denominator,inf);end
 
 function y=GenerateFi(N,K)
 Fi=zeros(N,K);
@@ -98,7 +107,7 @@ y=x_n;
 end
 
 function y=Bsk(x,k,K)
-xk=-1+2*((k-1)/(K-1));
+xk=x_k(k,K);
 y=Bs(2*(x-xk)+2);
 end
 function y=Approximation(x,N,K)
