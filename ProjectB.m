@@ -1,5 +1,5 @@
-clear
-close
+clear all
+close all
 
 
 step=100; %number of x's to generate the function on
@@ -10,7 +10,7 @@ x=linspace(-1,1,step); %vactor of linearly spread x's
 
 
 id=1;%to keep track of the figures' numbers
-pair_generator=[0.1,0.5,0.9];
+pair_generator=[0.1,0.5,2];
 %---------Task 1 & 2------------
 for N=10:10:30
     %Data containers preallocation
@@ -21,8 +21,7 @@ for N=10:10:30
     %Generating different pairs of N and K
     for i=1:3
         K=N*pair_generator(i);
-        K=K/2;
-        K=round(K);
+        K=round(K)+1;
         for s=1:step %Generating values of approximation on linearly spread x's
             approximation(s)=Approximate(x(s),N,K);
         end
@@ -37,6 +36,8 @@ for N=10:10:30
         ttle=strcat('Graph made for N=', num2str(N),' And for K= ', num2str(K));
         title(ttle);
         legend('original function','chosen points', 'function Approximate');
+        xlabel('-1 < x < 1') 
+        ylabel('y') 
         hold off
     end
 end
@@ -62,24 +63,32 @@ figure(id)
 id=id+1;
 surf(K,N,rms);
 title('Root-mean-square error dependency on N and K');
+xlabel('N') 
+ylabel('K') 
+zlabel('RMS')
 
 %Maximum error
 figure(id)
 id=id+1;
 surf(K,N,mxe);
 title('Maximum error dependency on N and K');
+xlabel('N') 
+ylabel('K') 
+zlabel('Max Error')
 
 
 %-------Task4----------
 N_const=20; %Number of points of the function upon the investigation is done
 step=10; %Number of values of sigma upon the investigation is done
-n_min=zeros(1,step); %N minimising the RMS
-k_min=zeros(1,step); %K minimising the RMS
 STD=logspace(-5,-1,step); %vector containing logaritmically spread values of standard deviation
 rms=zeros(N_const,N_const);
 rms_min=ones(1,step);
 mxe=zeros(N_const,N_const);
 mxe_min=ones(1,step);
+n_rms=zeros(1,step); %N minimising the RMS
+k_rms=zeros(1,step); %K minimising the RMS
+n_mxe=zeros(1,step); %N minimising the maximum error
+k_mxe=zeros(1,step); %K minimising the maximum error
 for i=1:step
     for n=1:N_const
         for k=1:N_const
@@ -89,14 +98,14 @@ for i=1:step
                 %RMS investigation
                 if(rms(n,k)<rms_min(i))
                     rms_min(i)=rms(n,k);
-                    n_min(i)=n;
-                    k_min(i)=k;
+                    n_rms(i)=n;
+                    k_rms(i)=k;
                 end
                 %Max Error investigation
                 if(mxe(n,k)<mxe_min(i))
                     mxe_min(i)=rms(n,k);
-                    n_min(i)=n;
-                    k_min(i)=k;
+                    n_mxe(i)=n;
+                    k_mxe(i)=k;
                 end
             else
                 rms(n,k)=NaN;
@@ -106,6 +115,10 @@ for i=1:step
     end
 end
 %RMS
+disp('N miminum for RMS:');
+n_rms
+disp('K miminum for RMS:');
+k_rms
 figure(id)
 id=id+1;
 p_rms = polyfit(STD, rms_min,3);
@@ -114,11 +127,17 @@ loglog(STD,rms_min, "ro");
 hold on
 loglog(STD,polynomial_rms,'m');
 hold off
-%title('RMS dependency on the STD');
+title('RMS dependency on the STD');
 legend('RMS min','polyfit approximation');
+xlabel('STD') 
+ylabel('RMS') 
 
 
 %Maximum error
+disp('N miminum for maximum error:');
+n_mxe
+disp('K miminum for maximum error:');
+k_mxe
 figure(id)
 id=id+1;
 p_mxe = polyfit(STD, mxe_min,3);
@@ -126,9 +145,11 @@ polynomial_mxe = polyval(p_mxe, STD);
 loglog(STD,mxe_min, "ro");
 hold on
 loglog(STD,polynomial_mxe,'m');
-%title('Maximum error dependency on the STD');
+title('Maximum error dependency on the STD');
 legend('Maximum error min','polyfit approximation');
 hold off
+xlabel('STD') 
+ylabel('Max error') 
 
 
 %Function calculating root-mean-square error 
